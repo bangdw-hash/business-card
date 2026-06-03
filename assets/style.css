@@ -10,6 +10,7 @@
   --red: #e53e3e;
   --danger: #e53e3e;
   --warning: #dd6b20;
+  --orange: #dd6b20;
   --success: #38a169;
   --indigo: #4f46e5;
   --teal: #0d9488;
@@ -96,7 +97,11 @@ a { color: var(--primary); text-decoration: none; }
 .step-item.active .step-circle { background: var(--primary); border-color: var(--primary); color: #fff; }
 .step-item.active .step-label  { color: var(--primary); font-weight: 600; }
 .step-item.done .step-circle   { background: var(--success); border-color: var(--success); color: #fff; }
+.step-item.done .step-label    { color: var(--success); font-weight: 600; }
 .step-item.done + .step-connector { background: var(--success); }
+.step-item.completed .step-circle { background: var(--success); border-color: var(--success); color: #fff; }
+.step-item.completed .step-label  { color: var(--success); font-weight: 600; }
+.step-item.completed + .step-connector { background: var(--success); }
 .step-content { display: none; }
 .step-content.active { display: block; }
 .step-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--gray-200); }
@@ -323,6 +328,18 @@ tr.urgent-row { border-left: 3px solid var(--danger); }
 .upload-area { border: 2px dashed var(--gray-300); border-radius: var(--radius); padding: 14px; text-align: center; font-size: 0.85rem; color: var(--gray-400); cursor: pointer; transition: all 0.2s; margin-top: 12px; }
 .upload-area:hover { border-color: var(--primary); color: var(--primary); }
 
+/* ── 조회 폼 ── */
+.lookup-form { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 24px; }
+
+/* ── 신청 이력 카드 (my-requests) ── */
+.request-card { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s; border-left: 4px solid var(--primary); }
+.request-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.request-card-info { flex: 1; min-width: 0; }
+.request-card-title { font-size: 0.95rem; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.request-card-meta { display: flex; gap: 10px; font-size: 0.8rem; color: var(--gray-400); flex-wrap: wrap; }
+.request-card-meta span { white-space: nowrap; }
+.request-card-badges { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
 /* ── 로딩 ── */
 .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--gray-200); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
 .spinner-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center; }
@@ -375,4 +392,6 @@ tr.urgent-row { border-left: 3px solid var(--danger); }
   .step-nav { flex-wrap: wrap; gap: 10px; justify-content: center; }
   .vendor-order-meta { grid-template-columns: repeat(2, 1fr); }
   .login-card { padding: 28px 20px; }
+  .request-card { flex-wrap: wrap; }
+  .request-card-title { white-space: normal; }
 }
