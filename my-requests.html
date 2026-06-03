@@ -11,7 +11,6 @@
 </head>
 <body>
 
-<!-- Navigation -->
 <nav class="nav-bar">
   <a href="index.html" class="nav-logo">
     <span class="nav-logo-badge">ASEA</span>
@@ -34,26 +33,22 @@
       <button id="detail-modal-close" class="modal-close">&times;</button>
     </div>
     <div class="modal-body">
-      <!-- Status Badge -->
       <div style="margin-bottom:16px;">
         <span id="detail-status-badge"></span>
         <span id="detail-urgent-badge"></span>
       </div>
 
-      <!-- Revision alert -->
       <div id="detail-revision-alert" class="alert alert-warning hidden">
         🔄 <strong>수정 요청됨:</strong> <span id="detail-admin-note-display"></span>
         <div style="margin-top:8px;">
-          <button id="btn-open-edit" class="btn btn-warning btn-sm">편집하기 →</button>
+          <button id="btn-open-edit" class="btn btn-warning btn-sm">편집하기 &rarr;</button>
         </div>
       </div>
 
-      <!-- Rejected alert -->
       <div id="detail-rejected-alert" class="alert alert-error hidden">
         ❌ <strong>반려 사유:</strong> <span id="detail-reject-reason"></span>
       </div>
 
-      <!-- Card previews -->
       <div class="card-previews-row" style="margin-bottom:20px;">
         <div class="card-preview-container">
           <div class="card-preview-label">앞면</div>
@@ -69,7 +64,6 @@
         </div>
       </div>
 
-      <!-- Detail info -->
       <div class="detail-grid">
         <div class="detail-item"><div class="detail-label">이름</div><div class="detail-value" id="d-name">-</div></div>
         <div class="detail-item"><div class="detail-label">이름 (English)</div><div class="detail-value" id="d-name-en">-</div></div>
@@ -87,7 +81,6 @@
         <div class="detail-item"><div class="detail-label">납기일</div><div class="detail-value" id="d-deadline">-</div></div>
       </div>
 
-      <!-- Timeline -->
       <div style="margin-top:16px;">
         <div class="summary-title">🔄 신청 히스토리</div>
         <div id="detail-timeline"></div>
@@ -102,9 +95,9 @@
 <!-- Edit Modal (for revision) -->
 <div id="edit-modal-overlay" class="modal-overlay hidden">
   <div class="modal">
-    <div class="modal-header" style="background:var(--orange);">
-      <h3>수정 요청 대응 &mdash; 내용 편집</h3>
-      <button id="edit-modal-close" class="modal-close">&times;</button>
+    <div class="modal-header" style="background:var(--warning);">
+      <h3 style="color:#fff;">수정 요청 대응 &mdash; 내용 편집</h3>
+      <button id="edit-modal-close" class="modal-close" style="color:#fff;">&times;</button>
     </div>
     <div class="modal-body">
       <div class="alert alert-warning" style="margin-bottom:16px;">
@@ -168,11 +161,9 @@
   </div>
 </div>
 
-<!-- Main -->
 <div class="container">
-  <div class="section-title">내 명함 신청 이력</div>
+  <div class="section-title" style="margin-bottom:16px;">내 명함 신청 이력</div>
 
-  <!-- Lookup Form -->
   <div class="lookup-form">
     <p style="font-size:14px;color:var(--gray-600);margin-bottom:16px;">신청 시 입력한 이름과 이메일을 입력하면 신청 내역을 조회할 수 있습니다.</p>
     <div class="form-row">
@@ -188,13 +179,11 @@
     <button id="btn-lookup" class="btn btn-primary">🔍 신청 이력 조회</button>
   </div>
 
-  <!-- Results -->
   <div id="lookup-loading" class="loading-dots hidden">
     <span></span><span></span><span></span>
   </div>
 
   <div id="results-container"></div>
-
 </div>
 
 <script src="js/config.js"></script>
@@ -208,17 +197,14 @@ var myRequests = [];
 var editingRequest = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Lookup button
   var lookupBtn = document.getElementById('btn-lookup');
   if (lookupBtn) lookupBtn.addEventListener('click', lookupRequests);
 
-  // Enter key in inputs
   ['lookup-name', 'lookup-email'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('keydown', function(e) { if (e.key === 'Enter') lookupRequests(); });
   });
 
-  // Close modals
   ['detail-modal-close', 'detail-modal-close-btn'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', closeDetailModal);
@@ -237,14 +223,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.target === editOverlay) closeEditModal();
   });
 
-  // Open edit from detail
   var openEditBtn = document.getElementById('btn-open-edit');
   if (openEditBtn) openEditBtn.addEventListener('click', function() {
     closeDetailModal();
     openEditModal(editingRequest);
   });
 
-  // Submit edit
   var submitEditBtn = document.getElementById('btn-submit-edit');
   if (submitEditBtn) submitEditBtn.addEventListener('click', submitEdit);
 });
@@ -252,26 +236,18 @@ document.addEventListener('DOMContentLoaded', function() {
 async function lookupRequests() {
   var name  = document.getElementById('lookup-name').value.trim();
   var email = document.getElementById('lookup-email').value.trim();
-
-  if (!name || !email) {
-    alert('이름과 이메일을 모두 입력해주세요.');
-    return;
-  }
+  if (!name || !email) { alert('이름과 이메일을 모두 입력해주세요.'); return; }
 
   var loadingEl = document.getElementById('lookup-loading');
   var container = document.getElementById('results-container');
-
   if (loadingEl) loadingEl.classList.remove('hidden');
   if (container) container.innerHTML = '';
 
   try {
     var { data, error } = await window.supabase
-      .from('card_requests')
-      .select('*')
-      .eq('applicant_name', name)
-      .eq('email', email)
+      .from('card_requests').select('*')
+      .eq('applicant_name', name).eq('email', email)
       .order('created_at', { ascending: false });
-
     if (error) throw error;
     myRequests = data || [];
     renderResults();
@@ -286,12 +262,10 @@ async function lookupRequests() {
 function renderResults() {
   var container = document.getElementById('results-container');
   if (!container) return;
-
   if (myRequests.length === 0) {
     container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div class="empty-state-title">신청 내역이 없습니다</div><div class="empty-state-desc">입력하신 이름과 이메일로 신청된 명함이 없습니다.</div></div>';
     return;
   }
-
   container.innerHTML = '<div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:12px;">신청 이력 (' + myRequests.length + '건)</div>' +
     myRequests.map(function(req) {
       var date = new Date(req.created_at).toLocaleDateString('ko-KR');
@@ -301,20 +275,17 @@ function renderResults() {
         '<div class="request-card-info">' +
           '<div class="request-card-title">' + esc(req.applicant_name) + ' &mdash; ' + esc(req.department) + ' ' + esc(req.position_kr) + '</div>' +
           '<div class="request-card-meta">' +
-            '<span>' + date + '</span>' +
-            '<span>' + paperLabel + '</span>' +
-            '<span>' + (req.quantity || '-') + '장</span>' +
+            '<span>' + date + '</span><span>' + paperLabel + '</span><span>' + (req.quantity||'-') + '장</span>' +
           '</div>' +
         '</div>' +
         '<div class="request-card-badges">' +
           urgentBadge +
-          '<span class="badge badge-' + req.status + '">' + (CONFIG.STATUS_NAMES[req.status] || req.status) + '</span>' +
+          '<span class="badge badge-' + req.status + '">' + (CONFIG.STATUS_NAMES[req.status]||req.status) + '</span>' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' +
         '</div>' +
       '</div>';
     }).join('');
 
-  // Bind click
   container.querySelectorAll('.request-card').forEach(function(card) {
     card.addEventListener('click', function() {
       var req = myRequests.find(function(r) { return r.id === card.dataset.id; });
@@ -331,69 +302,55 @@ function openDetailModal(req) {
 
   document.getElementById('detail-modal-title').textContent = req.applicant_name + ' 님 명함 신청';
 
-  // Status badge
   var statusBadgeEl = document.getElementById('detail-status-badge');
   if (statusBadgeEl) {
     statusBadgeEl.className = 'badge badge-' + req.status;
     statusBadgeEl.textContent = CONFIG.STATUS_NAMES[req.status] || req.status;
   }
-
   var urgentBadgeEl = document.getElementById('detail-urgent-badge');
-  if (urgentBadgeEl) {
-    urgentBadgeEl.innerHTML = req.is_urgent ? '<span class="urgent-badge" style="margin-left:8px;">⚠ 긴급</span>' : '';
-  }
+  if (urgentBadgeEl) urgentBadgeEl.innerHTML = req.is_urgent ? '<span class="urgent-badge" style="margin-left:8px;">⚠ 긴급</span>' : '';
 
-  // Revision / Rejected alerts
   var revAlert = document.getElementById('detail-revision-alert');
   var rejAlert = document.getElementById('detail-rejected-alert');
   if (revAlert) revAlert.classList.toggle('hidden', req.status !== 'revision');
   if (rejAlert) rejAlert.classList.toggle('hidden', req.status !== 'rejected');
   if (req.status === 'revision' && req.admin_note) {
-    var noteDisplay = document.getElementById('detail-admin-note-display');
-    if (noteDisplay) noteDisplay.textContent = req.admin_note;
+    var nd = document.getElementById('detail-admin-note-display');
+    if (nd) nd.textContent = req.admin_note;
   }
   if (req.status === 'rejected' && req.admin_note) {
-    var rejectReason = document.getElementById('detail-reject-reason');
-    if (rejectReason) rejectReason.textContent = req.admin_note;
+    var rr = document.getElementById('detail-reject-reason');
+    if (rr) rr.textContent = req.admin_note;
   }
 
-  // Fill detail fields
   var fieldMap = [
-    ['d-name', req.applicant_name], ['d-name-en', req.applicant_name_en || '-'],
-    ['d-dept', req.department], ['d-dept-en', req.department_en || '-'],
-    ['d-position', req.position_kr], ['d-position-en', req.position_en || '-'],
-    ['d-phone', req.phone || '-'], ['d-mobile', req.mobile || '-'],
-    ['d-email', req.email], ['d-ext', req.extension || '-'],
-    ['d-paper', CONFIG.PAPER_TYPE_NAMES[req.paper_type] || req.paper_type],
-    ['d-qty', (req.quantity || '-') + '장'],
+    ['d-name', req.applicant_name], ['d-name-en', req.applicant_name_en||'-'],
+    ['d-dept', req.department], ['d-dept-en', req.department_en||'-'],
+    ['d-position', req.position_kr], ['d-position-en', req.position_en||'-'],
+    ['d-phone', req.phone||'-'], ['d-mobile', req.mobile||'-'],
+    ['d-email', req.email], ['d-ext', req.extension||'-'],
+    ['d-paper', CONFIG.PAPER_TYPE_NAMES[req.paper_type]||req.paper_type],
+    ['d-qty', (req.quantity||'-')+'장'],
     ['d-created', new Date(req.created_at).toLocaleString('ko-KR')],
-    ['d-deadline', req.deadline_date || '-'],
+    ['d-deadline', req.deadline_date||'-'],
   ];
-  fieldMap.forEach(function(p) {
-    var el = document.getElementById(p[0]);
-    if (el) el.textContent = p[1];
-  });
+  fieldMap.forEach(function(p) { var el=document.getElementById(p[0]); if(el) el.textContent=p[1]; });
 
-  // Card previews
   renderCardFront(document.getElementById('detail-front-canvas'), {
-    name: req.applicant_name, department: req.department, positionKr: req.position_kr,
-    phone: req.phone, mobile: req.mobile, email: req.email,
-    extension: req.extension, address: req.address,
+    name:req.applicant_name, department:req.department, positionKr:req.position_kr,
+    phone:req.phone, mobile:req.mobile, email:req.email, extension:req.extension, address:req.address,
   });
-
   var backContainer = document.getElementById('detail-back-preview');
   if (req.is_bilingual) {
     if (backContainer) backContainer.classList.remove('hidden');
     renderCardBack(document.getElementById('detail-back-canvas'), {
-      nameEn: req.applicant_name_en, positionEn: req.position_en,
-      departmentEn: req.department_en, addressEn: req.address_en,
-      phone: req.phone, mobile: req.mobile, email: req.email,
+      nameEn:req.applicant_name_en, positionEn:req.position_en,
+      departmentEn:req.department_en, addressEn:req.address_en,
+      phone:req.phone, mobile:req.mobile, email:req.email,
     });
   } else {
     if (backContainer) backContainer.classList.add('hidden');
   }
-
-  // Timeline
   renderDetailTimeline(req.status_history);
 }
 
@@ -410,11 +367,7 @@ function renderDetailTimeline(historyRaw) {
     if (typeof historyRaw === 'string') history = JSON.parse(historyRaw);
     else if (Array.isArray(historyRaw)) history = historyRaw;
   } catch(e) { history = []; }
-
-  if (history.length === 0) {
-    container.innerHTML = '<p class="text-muted text-sm">이력 없음</p>';
-    return;
-  }
+  if (history.length === 0) { container.innerHTML = '<p class="text-muted text-sm">이력 없음</p>'; return; }
   container.innerHTML = '<div class="timeline">' +
     history.slice().reverse().map(function(item) {
       var date = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR') : '-';
@@ -424,8 +377,7 @@ function renderDetailTimeline(historyRaw) {
         '<div class="timeline-status">' + statusName + '</div>' +
         (item.note ? '<div class="timeline-note">' + esc(item.note) + '</div>' : '') +
         '</div>';
-    }).join('') +
-    '</div>';
+    }).join('') + '</div>';
 }
 
 function openEditModal(req) {
@@ -434,22 +386,16 @@ function openEditModal(req) {
   var overlay = document.getElementById('edit-modal-overlay');
   if (!overlay) return;
   overlay.classList.remove('hidden');
-
-  var adminNoteEl = document.getElementById('edit-admin-note');
-  if (adminNoteEl) adminNoteEl.textContent = req.admin_note || '';
-
-  // Prefill
+  var an = document.getElementById('edit-admin-note');
+  if (an) an.textContent = req.admin_note || '';
   var fields = [
-    ['edit-name', req.applicant_name], ['edit-name-en', req.applicant_name_en || ''],
-    ['edit-department', req.department], ['edit-department-en', req.department_en || ''],
-    ['edit-position-kr', req.position_kr], ['edit-position-en', req.position_en || ''],
-    ['edit-phone', req.phone || ''], ['edit-mobile', req.mobile || ''],
-    ['edit-email', req.email], ['edit-extension', req.extension || ''],
+    ['edit-name',req.applicant_name],['edit-name-en',req.applicant_name_en||''],
+    ['edit-department',req.department],['edit-department-en',req.department_en||''],
+    ['edit-position-kr',req.position_kr],['edit-position-en',req.position_en||''],
+    ['edit-phone',req.phone||''],['edit-mobile',req.mobile||''],
+    ['edit-email',req.email],['edit-extension',req.extension||''],
   ];
-  fields.forEach(function(p) {
-    var el = document.getElementById(p[0]);
-    if (el) el.value = p[1];
-  });
+  fields.forEach(function(p) { var el=document.getElementById(p[0]); if(el) el.value=p[1]; });
 }
 
 function closeEditModal() {
@@ -463,17 +409,9 @@ async function submitEdit() {
   var email = document.getElementById('edit-email').value.trim();
   var dept  = document.getElementById('edit-department').value.trim();
   var posKr = document.getElementById('edit-position-kr').value.trim();
+  if (!name||!email||!dept||!posKr) { alert('필수 항목을 모두 입력해주세요.'); return; }
 
-  if (!name || !email || !dept || !posKr) {
-    alert('필수 항목(이름, 이메일, 부서, 직급)을 모두 입력해주세요.');
-    return;
-  }
-
-  var historyEntry = {
-    status: 'pending',
-    timestamp: new Date().toISOString(),
-    note: '신청자 수정 후 재접수',
-  };
+  var historyEntry = { status:'pending', timestamp:new Date().toISOString(), note:'신청자 수정 후 재접수' };
   var currentHistory = [];
   try {
     if (typeof editingRequest.status_history === 'string') currentHistory = JSON.parse(editingRequest.status_history);
@@ -483,27 +421,22 @@ async function submitEdit() {
 
   var btn = document.getElementById('btn-submit-edit');
   if (btn) btn.disabled = true;
-
   try {
-    var { error } = await window.supabase
-      .from('card_requests')
-      .update({
-        applicant_name:    name,
-        applicant_name_en: document.getElementById('edit-name-en').value.trim() || null,
-        department:        dept,
-        department_en:     document.getElementById('edit-department-en').value.trim() || null,
-        position_kr:       posKr,
-        position_en:       document.getElementById('edit-position-en').value.trim() || null,
-        phone:             document.getElementById('edit-phone').value.trim() || null,
-        mobile:            document.getElementById('edit-mobile').value.trim() || null,
-        email:             email,
-        extension:         document.getElementById('edit-extension').value.trim() || null,
-        status:            'pending',
-        status_history:    JSON.stringify(currentHistory),
-        admin_note:        null,
-      })
-      .eq('id', editingRequest.id);
-
+    var { error } = await window.supabase.from('card_requests').update({
+      applicant_name:    name,
+      applicant_name_en: document.getElementById('edit-name-en').value.trim()||null,
+      department:        dept,
+      department_en:     document.getElementById('edit-department-en').value.trim()||null,
+      position_kr:       posKr,
+      position_en:       document.getElementById('edit-position-en').value.trim()||null,
+      phone:             document.getElementById('edit-phone').value.trim()||null,
+      mobile:            document.getElementById('edit-mobile').value.trim()||null,
+      email:             email,
+      extension:         document.getElementById('edit-extension').value.trim()||null,
+      status:            'pending',
+      status_history:    JSON.stringify(currentHistory),
+      admin_note:        null,
+    }).eq('id', editingRequest.id);
     if (error) throw error;
     alert('수정이 완료되었습니다. 관리자가 다시 검토할 예정입니다.');
     closeEditModal();
