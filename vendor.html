@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>거래체 대시보드 | 아세아항공직업전문학교</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- ========== ACCESS DENIED ========== -->
+<div id="access-denied" class="hidden">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--gray-50);">
+    <div style="text-align:center;padding:40px;">
+      <div style="font-size:64px;margin-bottom:16px;">🔒</div>
+      <h2 style="font-size:22px;color:var(--red);font-weight:700;margin-bottom:8px;">접근 권한이 없습니다</h2>
+      <p style="color:var(--gray-500);font-size:14px;">올바른 토큰이 포함된 URL로 접속해주세요.<br>
+      예: vendor.html?token=YOUR_TOKEN</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== VENDOR DASHBOARD ========== -->
+<div id="vendor-dashboard" class="hidden">
+
+  <!-- Nav -->
+  <nav class="nav-bar">
+    <a href="#" class="nav-logo">
+      <span class="nav-logo-badge">ASEA</span>
+      <span class="nav-logo-text">아세아항공직업전문학교 <span class="nav-logo-sub">거래체 포털</span></span>
+    </a>
+    <div class="nav-links">
+      <button class="tab-btn vendor-section-btn active" data-section="orders">팁 주문 관리</button>
+      <button class="tab-btn vendor-section-btn" data-section="payment">팁 대금 처리 내역</button>
+    </div>
+    <div class="nav-user">
+      <span style="font-size:13px;opacity:0.8;">거래체 전용</span>
+    </div>
+  </nav>
+
+  <div class="container-lg">
+
+    <!-- ========== ORDERS SECTION ========== -->
+    <div class="vendor-section" data-section="orders">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 16px;flex-wrap:wrap;gap:12px;">
+        <h2 class="section-title" style="margin:0;">팁 주문 내역</h2>
+        <button class="btn btn-secondary btn-sm" onclick="loadVendorOrders()">&#x21bb; 새로고침</button>
+      </div>
+
+      <!-- Tab filter -->
+      <div class="tab-filter">
+        <button class="vendor-tab-btn tab-btn active" data-filter="ordered">발주완료 <span class="tab-count">0</span></button>
+        <button class="vendor-tab-btn tab-btn" data-filter="printing">인쇄중 <span class="tab-count">0</span></button>
+        <button class="vendor-tab-btn tab-btn" data-filter="done">완료 <span class="tab-count">0</span></button>
+      </div>
+
+      <!-- Loading -->
+      <div id="vendor-orders-loading" class="loading-dots hidden">
+        <span></span><span></span><span></span>
+      </div>
+
+      <!-- Orders container -->
+      <div id="vendor-orders-container"></div>
+    </div>
+
+    <!-- ========== PAYMENT SECTION ========== -->
+    <div class="vendor-section hidden" data-section="payment">
+      <h2 class="section-title" style="margin:20px 0 16px;">💳 대금 처리 내역</h2>
+
+      <div class="alert alert-info" style="margin-bottom:16px;">
+        💡 대금 확인 완료 시효 PDF 다운로드가 가능합니다. 금액 수정은 관리자만 가능합니다.
+      </div>
+
+      <div id="vendor-payment-loading" class="loading-dots hidden">
+        <span></span><span></span><span></span>
+      </div>
+      <div id="vendor-payment-container"></div>
+    </div>
+
+  </div><!-- /container-lg -->
+</div><!-- /vendor-dashboard -->
+
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/payment.js"></script>
+<script src="js/vendor.js"></script>
+
+</body>
+</html>

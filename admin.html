@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 대시보드 | 아세아항공직업전문학교</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<!-- Admin spinner -->
+<div id="admin-spinner" class="spinner-overlay hidden">
+  <div class="spinner"></div>
+</div>
+
+<!-- ========== LOGIN VIEW ========== -->
+<div id="login-view">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-logo">ASEA</div>
+      <div class="login-school">아세아항공직업전문학교</div>
+      <div class="login-title">관리자 로그인</div>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">이메일</label>
+          <input type="email" id="login-email" class="form-input" placeholder="admin@asea.ac.kr" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">비밀번호</label>
+          <input type="password" id="login-password" class="form-input" placeholder="비밀번호" autocomplete="current-password">
+        </div>
+        <div id="login-error" class="form-error" style="margin-bottom:10px;"></div>
+        <button type="submit" id="btn-login" class="btn btn-primary w-full btn-lg">로그인</button>
+      </form>
+      <div style="margin-top:20px;font-size:12px;color:var(--gray-400);">
+        Supabase 인증 활성화 후 사용 가능합니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ADMIN VIEW ========== -->
+<div id="admin-view" class="hidden">
+
+  <!-- Nav -->
+  <nav class="nav-bar">
+    <a href="admin.html" class="nav-logo">
+      <span class="nav-logo-badge">ASEA</span>
+      <span class="nav-logo-text">아세아항공직업전문학교 <span class="nav-logo-sub">관리자</span></span>
+    </a>
+    <div class="nav-links">
+      <button class="tab-btn section-nav-btn active" data-section="requests">팁 신청 관리</button>
+      <button class="tab-btn section-nav-btn" data-section="payment">팁 대금 처리</button>
+    </div>
+    <div class="nav-user">
+      <span id="admin-email" style="font-size:13px;"></span>
+      <button id="btn-logout" class="btn-logout">로그아웃</button>
+    </div>
+  </nav>
+
+  <div class="container-lg">
+
+    <!-- ========== REQUESTS SECTION ========== -->
+    <div class="admin-section" data-section="requests">
+
+      <!-- Stats bar -->
+      <div class="stats-bar" style="margin-top:20px;">
+        <div class="stat-card">
+          <div class="stat-label">이번달 신청</div>
+          <div class="stat-value" id="stat-total-month">0</div>
+          <div class="stat-sub">기준: 이번 달</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">접수대기</div>
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-sub">검토 필요</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">진행중</div>
+          <div class="stat-value" id="stat-in-progress">0</div>
+          <div class="stat-sub">승인/발주/인쇄</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">완료</div>
+          <div class="stat-value" id="stat-done">0</div>
+          <div class="stat-sub">전달 완료</div>
+        </div>
+      </div>
+
+      <!-- Tab filter -->
+      <div class="tab-filter">
+        <button class="tab-btn active" data-filter="all">전체 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="pending">접수대기 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="approved">승인됨 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="revision">수정요청 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="rejected">반려 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="ordered">발주완료 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="printing">인쇄중 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="delivered_to_admin">관리자수령 <span class="tab-count">0</span></button>
+        <button class="tab-btn" data-filter="delivered_to_applicant">전달완료 <span class="tab-count">0</span></button>
+      </div>
+
+      <!-- Table -->
+      <div id="table-loading" class="loading-dots hidden"><span></span><span></span><span></span></div>
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>신청일</th>
+              <th>이름</th>
+              <th>부서</th>
+              <th>직급</th>
+              <th>용지</th>
+              <th>수량</th>
+              <th>긴급</th>
+              <th>상태</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody id="requests-tbody">
+            <tr><td colspan="9"><div class="loading-dots"><span></span><span></span><span></span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /requests section -->
+
+    <!-- ========== PAYMENT SECTION ========== -->
+    <div class="admin-section hidden" data-section="payment">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 16px;">
+        <h2 class="section-title" style="margin:0;">💳 월별 대금 관리</h2>
+        <button id="btn-generate-invoice" class="btn btn-primary btn-sm">이번달 인보이스 생성/갱신</button>
+      </div>
+      <div id="payment-loading" class="loading-dots hidden"><span></span><span></span><span></span></div>
+      <div class="admin-table-wrapper">
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>연월</th>
+              <th>발주 건수</th>
+              <th>수량</th>
+              <th>의 총금액</th>
+              <th>상태</th>
+              <th>지급 예정일</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody id="invoice-tbody">
+            <tr><td colspan="7"><div class="loading-dots"><span></span><span></span><span></span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /payment section -->
+
+  </div><!-- /container-lg -->
+</div><!-- /admin-view -->
+
+<!-- ========== DETAIL MODAL ========== -->
+<div id="detail-modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">명함 신청 상세</h3>
+      <button id="modal-close-btn" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Status + Previews -->
+      <div style="margin-bottom:12px;">
+        <span id="modal-detail-status"></span>
+      </div>
+
+      <div class="card-previews-row" style="margin-bottom:20px;">
+        <div class="card-preview-container">
+          <div class="card-preview-label">앞면</div>
+          <div class="card-canvas-wrapper">
+            <canvas id="modal-front-canvas" width="1050" height="600"></canvas>
+          </div>
+        </div>
+        <div id="modal-back-preview" class="card-preview-container hidden">
+          <div class="card-preview-label">뒷면 (영문)</div>
+          <div class="card-canvas-wrapper">
+            <canvas id="modal-back-canvas" width="1050" height="600"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info grid -->
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-label">이름</div><div class="detail-value" id="modal-detail-name"></div></div>
+        <div class="detail-item"><div class="detail-label">이름 (EN)</div><div class="detail-value" id="modal-detail-name-en"></div></div>
+        <div class="detail-item"><div class="detail-label">부서</div><div class="detail-value" id="modal-detail-dept"></div></div>
+        <div class="detail-item"><div class="detail-label">부서 (EN)</div><div class="detail-value" id="modal-detail-dept-en"></div></div>
+        <div class="detail-item"><div class="detail-label">직급</div><div class="detail-value" id="modal-detail-position"></div></div>
+        <div class="detail-item"><div class="detail-label">직급 (EN)</div><div class="detail-value" id="modal-detail-position-en"></div></div>
+        <div class="detail-item"><div class="detail-label">전화번호</div><div class="detail-value" id="modal-detail-phone"></div></div>
+        <div class="detail-item"><div class="detail-label">휴대폰</div><div class="detail-value" id="modal-detail-mobile"></div></div>
+        <div class="detail-item"><div class="detail-label">팩스</div><div class="detail-value" id="modal-detail-fax"></div></div>
+        <div class="detail-item"><div class="detail-label">이메일</div><div class="detail-value" id="modal-detail-email"></div></div>
+        <div class="detail-item"><div class="detail-label">내선번호</div><div class="detail-value" id="modal-detail-extension"></div></div>
+        <div class="detail-item"><div class="detail-label">용지 종류</div><div class="detail-value" id="modal-detail-paper"></div></div>
+        <div class="detail-item"><div class="detail-label">수량</div><div class="detail-value" id="modal-detail-quantity"></div></div>
+        <div class="detail-item"><div class="detail-label">영문 뒷면</div><div class="detail-value" id="modal-detail-bilingual"></div></div>
+        <div class="detail-item"><div class="detail-label">긴급</div><div class="detail-value" id="modal-detail-urgent"></div></div>
+        <div class="detail-item"><div class="detail-label">재발주</div><div class="detail-value" id="modal-detail-reorder"></div></div>
+        <div class="detail-item"><div class="detail-label">수령방법</div><div class="detail-value" id="modal-detail-delivery"></div></div>
+        <div class="detail-item"><div class="detail-label">납기일</div><div class="detail-value" id="modal-detail-deadline"></div></div>
+        <div class="detail-item"><div class="detail-label">단가</div><div class="detail-value" id="modal-detail-unit-price"></div></div>
+        <div class="detail-item"><div class="detail-label">의 총가</div><div class="detail-value" id="modal-detail-total-price"></div></div>
+        <div class="detail-item"><div class="detail-label">신청일시</div><div class="detail-value" id="modal-detail-created"></div></div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-row" style="margin-top:12px;">
+        <div class="detail-item">
+          <div class="detail-label">관리자 메모</div>
+          <div class="detail-value" id="modal-detail-admin-note"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">주문 특이사항</div>
+          <div class="detail-value" id="modal-detail-order-note"></div>
+        </div>
+      </div>
+      <div class="detail-item" style="margin-top:8px;">
+        <div class="detail-label">거래체 메모</div>
+        <div class="detail-value" id="modal-detail-vendor-note"></div>
+      </div>
+
+      <!-- Admin note edit -->
+      <div style="margin-top:16px;">
+        <label style="font-size:12px;font-weight:600;color:var(--gray-600);"B>관리자 메모 수정</label>
+        <div class="input-with-button" style="margin-top:6px;">
+          <textarea id="modal-admin-note-input" class="form-textarea" rows="2" placeholder="내부 메모..."></textarea>
+          <button id="btn-save-admin-note" class="btn btn-secondary btn-sm">저장</button>
+        </div>
+      </div>
+
+      <!-- Approval inputs (shown for pending/revision) -->
+      <div id="approve-inputs-section" style="margin-top:16px;padding:16px;background:var(--gray-50);border-radius:var(--radius);">
+        <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:12px;">승인 시 입력 사항</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label style="font-size:12px;">납기일</label>
+            <input type="date" id="approve-deadline" class="form-input">
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;">단가 (원)</label>
+            <input type="number" id="approve-unit-price" class="form-input" placeholder="12000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label style="font-size:12px;">의 총가 (원)</label>
+            <input type="number" id="approve-total-price" class="form-input" placeholder="12000">
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;">주문 특이사항 (거래체에게 전달)</label>
+            <input type="text" id="approve-order-note" class="form-input" placeholder="특이사항...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;">
+        <button id="btn-action-approve"             class="btn btn-success btn-sm">✅ 승인</button>
+        <button id="btn-action-revision"            class="btn btn-warning btn-sm">🔄 수정요청</button>
+        <button id="btn-action-reject"              class="btn btn-danger btn-sm">❌ 반려</button>
+        <button id="btn-action-ordered"             class="btn btn-primary btn-sm">📦 발주완료</button>
+        <button id="btn-action-printing"            class="btn btn-sm" style="background:var(--indigo);color:#fff;">🖨️ 인쇄중</button>
+        <button id="btn-action-delivered-admin"     class="btn btn-sm" style="background:var(--teal);color:#fff;">📩 관리자수령</button>
+        <button id="btn-action-delivered-applicant" class="btn btn-sm" style="background:var(--green);color:#fff;">✅ 전달완료</button>
+      </div>
+
+      <!-- Timeline -->
+      <div style="margin-top:20px;">
+        <div class="summary-title">🔄 신청 히스토리</div>
+        <div id="modal-timeline"></div>
+      </div>
+
+    </div><!-- /modal-body -->
+    <div class="modal-footer">
+      <button id="modal-footer-close" class="btn btn-secondary">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== INVOICE MODAL ========== -->
+<div id="invoice-modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="invoice-modal-title">발주 내역 상세</h3>
+      <button id="invoice-modal-close" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid" style="margin-bottom:20px;">
+        <div class="detail-item">
+          <div class="detail-label">연월</div>
+          <div class="detail-value" id="invoice-modal-year-month"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">상태</div>
+          <div class="detail-value" id="invoice-modal-status-badge"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">의 주문 건수</div>
+          <div class="detail-value" id="invoice-modal-total-orders"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">수량</div>
+          <div class="detail-value" id="invoice-modal-total-qty"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">의 총금액</div>
+          <div class="detail-value" id="invoice-modal-total-amount"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">지급 예정일</div>
+          <div class="detail-value" id="invoice-modal-due-date"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">지급일</div>
+          <div class="detail-value" id="invoice-modal-payment-date"></div>
+        </div>
+      </div>
+
+      <!-- Set due date -->
+      <div class="form-row" style="margin-bottom:12px;">
+        <div class="form-group">
+          <label style="font-size:12px;">지급 예정일 설정</label>
+          <div class="input-with-button">
+            <input type="date" id="invoice-due-date-input" class="form-input">
+            <button id="btn-save-due-date" class="btn btn-secondary btn-sm">저장</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-size:12px;">관리자 메모</label>
+          <div class="input-with-button">
+            <input type="text" id="invoice-admin-note-input" class="form-input" placeholder="메모...">
+          </div>
+        </div>
+      </div>
+
+      <!-- Order list -->
+      <div style="font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:10px;">포함 주문 내역</div>
+      <div id="invoice-order-list"></div>
+
+    </div>
+    <div class="modal-footer">
+      <button id="btn-recalculate" class="btn btn-secondary btn-sm">합계 재계산</button>
+      <button id="btn-invoice-pdf" class="btn btn-accent btn-sm">📄 PDF 다운로드</button>
+      <button id="invoice-footer-close" class="btn btn-secondary">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/payment.js"></script>
+<script src="js/admin.js"></script>
+
+<script>
+  // Extra modal close bindings
+  document.addEventListener('DOMContentLoaded', function() {
+    var footerClose = document.getElementById('modal-footer-close');
+    if (footerClose) footerClose.addEventListener('click', function() {
+      var mo = document.getElementById('detail-modal-overlay');
+      if (mo) mo.classList.add('hidden');
+    });
+    var invFooterClose = document.getElementById('invoice-footer-close');
+    if (invFooterClose) invFooterClose.addEventListener('click', function() {
+      var io = document.getElementById('invoice-modal-overlay');
+      if (io) io.classList.add('hidden');
+    });
+  });
+</script>
+
+</body>
+</html>
