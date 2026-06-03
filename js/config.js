@@ -1,10 +1,10 @@
 // ============================================================
-// 설정 파일 — 실제 사용 전 아래 플레이스홀더를 교체하세요
+// 설정 파일 — 실제 사용 전 YOUR_* 플레이스홀더를 교체하세요
 // ============================================================
 const CONFIG = {
   supabase: {
-    url: 'YOUR_SUPABASE_URL',           // 예: https://xxxx.supabase.co
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',  // Supabase 프로젝트 anon key
+    url: 'YOUR_SUPABASE_URL',
+    anonKey: 'YOUR_SUPABASE_ANON_KEY',
   },
   telegram: {
     botToken: 'YOUR_TELEGRAM_BOT_TOKEN',
@@ -27,8 +27,20 @@ const CONFIG = {
     baseUrl: 'https://bangdw-hash.github.io/business-card',
     schoolName: '아세아항공직업전문학교',
     schoolNameEn: 'ASEA Aviation Vocational School',
-    defaultAddress: '서울특별시 강서구 오쇠로 56',
-    defaultAddressEn: '56, Osoe-ro, Gangseo-gu, Seoul, Korea',
+    defaultAddress: '서울특별시 강서구 오쇠로 56 (아세아항공직업전문학교)',
+    defaultAddressEn: '56, Osoe-ro, Gangseo-gu, Seoul, Republic of Korea',
+  },
+
+  // 용지 종류 표시명
+  PAPER_TYPE_NAMES: {
+    standard: '일반지',
+    premium:  '프리미엄지 (고급)',
+  },
+
+  // 수령 방법 표시명
+  DELIVERY_METHOD_NAMES: {
+    pickup:   '방문 수령',
+    delivery: '우편 배송',
   },
 
   // 명함 앞면 레이아웃 (px, 캔버스 1050×600 기준)
@@ -95,7 +107,7 @@ const CONFIG = {
   },
 };
 
-// 직급 번역 사전 (국문 → 영문 후보)
+// 직급 번역 사전
 const POSITION_DICT = {
   '학장':     ['President', 'Dean', 'Chancellor'],
   '부학장':   ['Vice President', 'Vice Dean', 'Deputy President'],
