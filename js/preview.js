@@ -1,9 +1,31 @@
 // 명함 캔버스 미리보기 렌더링
+// data 키는 snake_case / camelCase 모두 허용
 
-function renderCardFront(canvas, data) {
+function _norm(data) {
+  // card-form.js 는 positionKr, admin/vendor 는 position_kr 사용 — 둘 다 처리
+  return {
+    name:         data.name        || data.applicant_name    || '',
+    nameEn:       data.nameEn      || data.applicant_name_en || '',
+    department:   data.department  || '',
+    departmentEn: data.departmentEn|| data.department_en     || '',
+    positionKr:   data.positionKr  || data.position_kr       || '',
+    positionEn:   data.positionEn  || data.position_en       || '',
+    phone:        data.phone       || '',
+    mobile:       data.mobile      || '',
+    fax:          data.fax         || '',
+    email:        data.email       || '',
+    extension:    data.extension   || '',
+    address:      data.address     || CONFIG.app.defaultAddress,
+    addressEn:    data.addressEn   || data.address_en || CONFIG.app.defaultAddressEn,
+  };
+}
+
+function renderCardFront(canvas, rawData) {
+  if (!canvas) return;
+  const d = _norm(rawData || {});
   const L = CONFIG.cardFrontLayout;
   const ctx = canvas.getContext('2d');
-  canvas.width = L.width;
+  canvas.width  = L.width;
   canvas.height = L.height;
 
   // 배경
@@ -32,35 +54,28 @@ function renderCardFront(canvas, data) {
   ctx.lineTo(L.divider.x + L.divider.w, L.divider.y);
   ctx.stroke();
 
-  const fields = L.fields;
+  const F = L.fields;
+  _drawField(ctx, F.name,       d.name,       '[이름]');
+  _drawField(ctx, F.position,   d.positionKr, '[직급]');
+  _drawField(ctx, F.department, d.department, '[부서]');
+  if (d.phone)     _drawLabelField(ctx, F.phone,     d.phone,     null);
+  if (d.mobile)    _drawLabelField(ctx, F.mobile,    d.mobile,    null);
+  if (d.fax)       _drawLabelField(ctx, F.fax,       d.fax,       null);
+  _drawLabelField(ctx, F.email,     d.email,     '[이메일]');
+  if (d.extension) _drawLabelField(ctx, F.extension, d.extension, null);
 
-  // 이름
-  drawField(ctx, fields.name, data.name, '[이름]');
-  // 직급
-  drawField(ctx, fields.position, data.position_kr, '[직급]');
-  // 부서
-  drawField(ctx, fields.department, data.department, '[부서]');
-  // 전화
-  if (data.phone || data.extension) drawLabelField(ctx, fields.phone, data.phone, '[전화번호]');
-  // 휴대폰
-  if (data.mobile) drawLabelField(ctx, fields.mobile, data.mobile, '[휴대폰]');
-  // 팩스
-  if (data.fax) drawLabelField(ctx, fields.fax, data.fax, '[팩스]');
-  // 이메일
-  drawLabelField(ctx, fields.email, data.email, '[이메일]');
-  // 내선
-  if (data.extension) drawLabelField(ctx, fields.extension, data.extension, null);
   // 주소
-  const addr = data.address || CONFIG.app.defaultAddress;
-  ctx.fillStyle = fields.address.color;
-  ctx.font = `${fields.address.fontSize}px 'Noto Sans KR', sans-serif`;
-  ctx.fillText(addr, fields.address.x, fields.address.y);
+  ctx.fillStyle = F.address.color;
+  ctx.font = `${F.address.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.fillText(d.address, F.address.x, F.address.y);
 }
 
-function renderCardBack(canvas, data) {
+function renderCardBack(canvas, rawData) {
+  if (!canvas) return;
+  const d = _norm(rawData || {});
   const L = CONFIG.cardBackLayout;
   const ctx = canvas.getContext('2d');
-  canvas.width = L.width;
+  canvas.width  = L.width;
   canvas.height = L.height;
 
   // 배경
@@ -88,55 +103,66 @@ function renderCardBack(canvas, data) {
   ctx.lineTo(L.divider.x + L.divider.w, L.divider.y);
   ctx.stroke();
 
-  const fields = L.fields;
-  drawField(ctx, fields.nameEn, data.applicant_name_en, '[English Name]');
-  drawField(ctx, fields.positionEn, data.position_en, '[Title]');
-  drawField(ctx, fields.departmentEn, data.department_en, '[Department]');
-  if (data.phone) drawLabelField(ctx, fields.phone, data.phone, '[Phone]');
-  if (data.mobile) drawLabelField(ctx, fields.mobile, data.mobile, '[Mobile]');
-  drawLabelField(ctx, fields.email, data.email, '[Email]');
-  const addrEn = data.address_en || CONFIG.app.defaultAddressEn;
-  ctx.fillStyle = fields.addressEn.color;
-  ctx.font = `${fields.addressEn.fontSize}px 'Inter', sans-serif`;
-  ctx.fillText(addrEn, fields.addressEn.x, fields.addressEn.y);
+  const F = L.fields;
+  _drawField(ctx, F.nameEn,       d.nameEn,       '[English Name]');
+  _drawField(ctx, F.positionEn,   d.positionEn,   '[Title]');
+  _drawField(ctx, F.departmentEn, d.departmentEn, '[Department]');
+  if (d.phone)  _drawLabelField(ctx, F.phone,  d.phone,  null);
+  if (d.mobile) _drawLabelField(ctx, F.mobile, d.mobile, null);
+  _drawLabelField(ctx, F.email, d.email, '[Email]');
+
+  ctx.fillStyle = F.addressEn.color;
+  ctx.font = `${F.addressEn.fontSize}px 'Inter', sans-serif`;
+  ctx.fillText(d.addressEn, F.addressEn.x, F.addressEn.y);
 }
 
-function drawField(ctx, field, value, placeholder) {
-  const text = value && value.trim() ? value : placeholder;
+// 초기 placeholder 렌더링 (빈 상태)
+function renderPlaceholderFront(canvas) {
+  renderCardFront(canvas, {});
+}
+
+function renderPlaceholderBack(canvas) {
+  renderCardBack(canvas, {});
+}
+
+function downloadCardImage(canvas, filename) {
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = filename || 'business-card.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// ---- 내부 헬퍼 ----
+function _drawField(ctx, field, value, placeholder) {
+  const text    = value && value.trim() ? value : placeholder;
   const isEmpty = !value || !value.trim();
-  ctx.fillStyle = isEmpty ? '#bbbbbb' : field.color;
+  ctx.fillStyle = isEmpty ? '#cccccc' : field.color;
   ctx.font = `${field.bold ? 'bold ' : ''}${field.fontSize}px 'Noto Sans KR', 'Inter', sans-serif`;
-  if (isEmpty) {
+  if (isEmpty && placeholder) {
     ctx.save();
-    ctx.setLineDash([4, 4]);
+    ctx.setLineDash([4, 3]);
     ctx.strokeStyle = '#cccccc';
-    const metrics = ctx.measureText(placeholder);
-    ctx.strokeRect(field.x - 4, field.y - field.fontSize, metrics.width + 8, field.fontSize + 8);
+    const mw = ctx.measureText(placeholder).width;
+    ctx.strokeRect(field.x - 2, field.y - field.fontSize + 2, mw + 4, field.fontSize + 4);
     ctx.restore();
   }
-  ctx.fillText(text, field.x, field.y);
+  if (text) ctx.fillText(text, field.x, field.y);
 }
 
-function drawLabelField(ctx, field, value, placeholder) {
-  const label = field.label || '';
-  const text = value && value.trim() ? value : (placeholder || '');
+function _drawLabelField(ctx, field, value, placeholder) {
+  const label   = field.label || '';
+  const text    = value && value.trim() ? value : (placeholder || '');
   const isEmpty = !value || !value.trim();
   if (label) {
     ctx.fillStyle = '#888888';
     ctx.font = `${field.fontSize - 1}px 'Inter', sans-serif`;
     ctx.fillText(label, field.x, field.y);
-    const labelW = ctx.measureText(label + ' ').width;
-    ctx.fillStyle = isEmpty ? '#bbbbbb' : field.color;
+    const lw = ctx.measureText(label + ' ').width;
+    ctx.fillStyle = isEmpty ? '#cccccc' : field.color;
     ctx.font = `${field.fontSize}px 'Noto Sans KR', 'Inter', sans-serif`;
-    ctx.fillText(text, field.x + labelW, field.y);
+    if (text) ctx.fillText(text, field.x + lw, field.y);
   } else {
-    drawField(ctx, field, value, placeholder);
+    _drawField(ctx, field, value, placeholder);
   }
-}
-
-function downloadCardImage(canvas, filename) {
-  const link = document.createElement('a');
-  link.download = filename || 'business-card.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
 }
