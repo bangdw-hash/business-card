@@ -23,7 +23,7 @@ var formData    = {
   fax:               '',
   email:             '',
   extension:         '',
-  address:           '서울특별시 강서구 오쇠로 56 (아세아항공직업전문학교)',
+  address:           '서울특별시 강서구 오쇼로 56 (아세아항공직업전문학교)',
   address_en:        '56, Osoe-ro, Gangseo-gu, Seoul, Republic of Korea',
   // Step 3
   quantity:          100,
@@ -47,7 +47,6 @@ function initFormPage() {
       paperCards.forEach(function (c) { c.classList.remove('selected'); });
       card.classList.add('selected');
       formData.paper_type = card.dataset.value;
-      // Show/hide bilingual option based on paper type
       updateBilingualVisibility();
     });
   });
@@ -168,11 +167,17 @@ function goToStep(step) {
     if (content) content.classList.toggle('active', i === step);
   }
 
+  // Update step nav visibility
+  for (var j = 1; j <= totalSteps; j++) {
+    var nav = document.getElementById('step-nav-' + j);
+    if (nav) nav.classList.toggle('hidden', j !== step);
+  }
+
   // Update step indicator
   var stepItems = document.querySelectorAll('.step-item');
   stepItems.forEach(function (item, idx) {
     var stepNum = idx + 1;
-    item.classList.remove('active', 'completed');
+    item.classList.remove('active', 'completed', 'done');
     if (stepNum < step) item.classList.add('completed');
     else if (stepNum === step) item.classList.add('active');
   });
@@ -235,7 +240,6 @@ function validateStep2() {
 }
 
 function validateStep3() {
-  // quantity check
   var qty = formData.quantity;
   if (!qty || qty < 1 || qty > 10000) {
     alert('수량은 1~10,000장 사이로 입력해주세요.');
@@ -257,11 +261,10 @@ function collectStep2Data() {
   formData.fax               = getVal('input-fax');
   formData.email             = getVal('input-email');
   formData.extension         = getVal('input-extension');
-  formData.address           = getVal('input-address') || '서울특별시 강서구 오쇠로 56 (아세아항공직업전문학교)';
+  formData.address           = getVal('input-address') || '서울특별시 강서구 오쇼로 56 (아세아항공직업전문학교)';
 }
 
 function collectStep3Data() {
-  // Sync step-3 preview inputs back to formData
   var qtySelect = document.getElementById('quantity-select');
   if (qtySelect) {
     if (qtySelect.value === 'other') {
@@ -372,7 +375,6 @@ function updateBackPreview() {
 }
 
 function autoPopulateEnglishFields() {
-  // Pre-fill english fields from step 2 if empty
   if (!getVal('input-back-name-en') && formData.applicant_name_en) {
     setVal('input-back-name-en', formData.applicant_name_en);
   }
@@ -399,12 +401,13 @@ function autoPopulateEnglishFields() {
 function toggleBackSection(show) {
   var backSection = document.getElementById('card-back-section');
   if (backSection) backSection.classList.toggle('hidden', !show);
+  var noMsg = document.getElementById('no-bilingual-msg');
+  if (noMsg) noMsg.classList.toggle('hidden', show);
 }
 
 function updateBilingualVisibility() {
   var bilingualSection = document.getElementById('bilingual-section');
   if (bilingualSection) {
-    // premium paper forces bilingual; standard allows toggle
     if (formData.paper_type === 'premium') {
       bilingualSection.classList.remove('hidden');
     }
@@ -453,8 +456,6 @@ async function handleReorderLookup() {
       alert('이전 신청 내역을 찾을 수 없습니다.');
       return;
     }
-
-    // Pre-fill form with previous data
     prefillFromRequest(data);
     alert('이전 신청 내역이 입력되었습니다. 내용을 확인하세요.');
   } catch (e) {
@@ -476,8 +477,6 @@ function prefillFromRequest(req) {
   setVal('input-email',         req.email             || '');
   setVal('input-extension',     req.extension         || '');
   setVal('input-address',       req.address           || '');
-
-  // Update paper type
   if (req.paper_type) {
     formData.paper_type = req.paper_type;
     document.querySelectorAll('.paper-type-card').forEach(function (c) {
@@ -529,8 +528,9 @@ function renderFinalPreviews() {
     address:    formData.address,
   });
 
+  var backContainer = document.getElementById('summary-back-preview-container');
   if (formData.is_bilingual || formData.paper_type === 'premium') {
-    if (backCanvas) backCanvas.closest('.card-preview-container').classList.remove('hidden');
+    if (backContainer) backContainer.classList.remove('hidden');
     renderCardBack(backCanvas, {
       nameEn:       formData.applicant_name_en,
       positionEn:   formData.position_en,
@@ -541,10 +541,7 @@ function renderFinalPreviews() {
       email:        formData.email,
     });
   } else {
-    if (backCanvas) {
-      var container = backCanvas.closest('.card-preview-container');
-      if (container) container.classList.add('hidden');
-    }
+    if (backContainer) backContainer.classList.add('hidden');
   }
 }
 
@@ -592,11 +589,9 @@ async function submitRequest() {
 
     if (error) throw error;
 
-    // Send Telegram notification
     var message = getNewRequestMessage(data);
     await sendTelegramNotification(message);
 
-    // Show success modal
     var requestIdEl = document.getElementById('success-request-id');
     if (requestIdEl) requestIdEl.textContent = data.id.slice(0, 8).toUpperCase();
     var modal = document.getElementById('success-modal');
