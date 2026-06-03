@@ -43,6 +43,18 @@ const CONFIG = {
     delivery: '우편 배송',
   },
 
+  // 상태 한국어 표시명 (STATUS_NAMES 와 statusLabels 동일 — 두 이름 모두 지원)
+  STATUS_NAMES: {
+    pending:                '접수대기',
+    approved:               '승인됨',
+    revision:               '수정요청',
+    rejected:               '반려',
+    ordered:                '발주완료',
+    printing:               '인쇄중',
+    delivered_to_admin:     '관리자수령',
+    delivered_to_applicant: '전달완료',
+  },
+
   // 명함 앞면 레이아웃 (px, 캔버스 1050×600 기준)
   cardFrontLayout: {
     width: 1050,
@@ -87,25 +99,16 @@ const CONFIG = {
     }
   },
 
-  // 상태 한국어 표시명
-  statusLabels: {
-    pending:                '접수대기',
-    approved:               '승인됨',
-    revision:               '수정요청',
-    rejected:               '반려',
-    ordered:                '발주완료',
-    printing:               '인쇄중',
-    delivered_to_admin:     '관리자수령',
-    delivered_to_applicant: '전달완료',
-  },
-
-  // 인보이스 상태 표시명
+  // invoiceStatusLabels
   invoiceStatusLabels: {
     pending:   '미확인',
     confirmed: '확인완료',
     paid:      '지급완료',
   },
 };
+
+// statusLabels 는 STATUS_NAMES 의 별칭
+CONFIG.statusLabels = CONFIG.STATUS_NAMES;
 
 // 직급 번역 사전
 const POSITION_DICT = {
