@@ -1,10 +1,10 @@
 // ============================================================
-// 설정 파일 — 실제 사용 전 YOUR_* 플레이스홀더를 교체하세요
+// 설정 파일
 // ============================================================
 const CONFIG = {
   supabase: {
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+    url: 'https://hfhbbfmpgqkfefzmfnon.supabase.co',
+    anonKey: 'sb_publishable_7ezWGPEXJ7TR9UYb9OgBig_oZLy6aDy',
   },
   telegram: {
     botToken: 'YOUR_TELEGRAM_BOT_TOKEN',
@@ -27,7 +27,7 @@ const CONFIG = {
     baseUrl: 'https://bangdw-hash.github.io/business-card',
     schoolName: '아세아항공직업전문학교',
     schoolNameEn: 'ASEA Aviation Vocational School',
-    defaultAddress: '서울특별시 강서구 오쇠로 56 (아세아항공직업전문학교)',
+    defaultAddress: '서울특별시 강서구 오쇄로 56 (아세아항공직업전문학교)',
     defaultAddressEn: '56, Osoe-ro, Gangseo-gu, Seoul, Republic of Korea',
   },
 
@@ -43,7 +43,7 @@ const CONFIG = {
     delivery: '우편 배송',
   },
 
-  // 상태 한국어 표시명 (STATUS_NAMES 와 statusLabels 동일 — 두 이름 모두 지원)
+  // 상태 한국어 표시명
   STATUS_NAMES: {
     pending:                '접수대기',
     approved:               '승인됨',
@@ -78,7 +78,7 @@ const CONFIG = {
     }
   },
 
-  // 명함 뒷면 레이아웃 (영문)
+  // 명함 듷면 레이아웃 (영문)
   cardBackLayout: {
     width: 1050,
     height: 600,
@@ -125,7 +125,7 @@ const POSITION_DICT = {
   '교수':     ['Professor', 'Instructor'],
   '조교수':   ['Assistant Professor'],
   '부교수':   ['Associate Professor'],
-  '겸임교수': ['Adjunct Professor', 'Part-time Professor'],
+  '겣8임교수': ['Adjunct Professor', 'Part-time Professor'],
   '강사':     ['Lecturer', 'Instructor', 'Trainer'],
   '교육원장': ['Director of Training Center', 'Training Director'],
   '학부장':   ['Department Chair', 'Division Head', 'Head of School'],
