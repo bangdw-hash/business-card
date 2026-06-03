@@ -56,8 +56,8 @@
       <span class="nav-logo-text">아세아항공직업전문학교 <span class="nav-logo-sub">관리자</span></span>
     </a>
     <div class="nav-links">
-      <button class="tab-btn section-nav-btn active" data-section="requests">팁 신청 관리</button>
-      <button class="tab-btn section-nav-btn" data-section="payment">팁 대금 처리</button>
+      <button class="tab-btn section-nav-btn active" data-section="requests">명함 신청 관리</button>
+      <button class="tab-btn section-nav-btn" data-section="payment">대금 처리</button>
     </div>
     <div class="nav-user">
       <span id="admin-email" style="font-size:13px;"></span>
@@ -146,7 +146,7 @@
               <th>연월</th>
               <th>발주 건수</th>
               <th>수량</th>
-              <th>의 총금액</th>
+              <th>총금액</th>
               <th>상태</th>
               <th>지급 예정일</th>
               <th>액션</th>
@@ -164,7 +164,7 @@
 
 <!-- ========== DETAIL MODAL ========== -->
 <div id="detail-modal-overlay" class="modal-overlay hidden">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-header">
       <h3 id="modal-title">명함 신청 상세</h3>
       <button id="modal-close-btn" class="modal-close">&times;</button>
@@ -212,7 +212,7 @@
         <div class="detail-item"><div class="detail-label">수령방법</div><div class="detail-value" id="modal-detail-delivery"></div></div>
         <div class="detail-item"><div class="detail-label">납기일</div><div class="detail-value" id="modal-detail-deadline"></div></div>
         <div class="detail-item"><div class="detail-label">단가</div><div class="detail-value" id="modal-detail-unit-price"></div></div>
-        <div class="detail-item"><div class="detail-label">의 총가</div><div class="detail-value" id="modal-detail-total-price"></div></div>
+        <div class="detail-item"><div class="detail-label">총가</div><div class="detail-value" id="modal-detail-total-price"></div></div>
         <div class="detail-item"><div class="detail-label">신청일시</div><div class="detail-value" id="modal-detail-created"></div></div>
       </div>
 
@@ -228,13 +228,13 @@
         </div>
       </div>
       <div class="detail-item" style="margin-top:8px;">
-        <div class="detail-label">거래체 메모</div>
+        <div class="detail-label">거래처 메모</div>
         <div class="detail-value" id="modal-detail-vendor-note"></div>
       </div>
 
       <!-- Admin note edit -->
       <div style="margin-top:16px;">
-        <label style="font-size:12px;font-weight:600;color:var(--gray-600);"B>관리자 메모 수정</label>
+        <label style="font-size:12px;font-weight:600;color:var(--gray-600);">관리자 메모 수정</label>
         <div class="input-with-button" style="margin-top:6px;">
           <textarea id="modal-admin-note-input" class="form-textarea" rows="2" placeholder="내부 메모..."></textarea>
           <button id="btn-save-admin-note" class="btn btn-secondary btn-sm">저장</button>
@@ -256,11 +256,11 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label style="font-size:12px;">의 총가 (원)</label>
+            <label style="font-size:12px;">총가 (원)</label>
             <input type="number" id="approve-total-price" class="form-input" placeholder="12000">
           </div>
           <div class="form-group">
-            <label style="font-size:12px;">주문 특이사항 (거래체에게 전달)</label>
+            <label style="font-size:12px;">주문 특이사항 (거래처에게 전달)</label>
             <input type="text" id="approve-order-note" class="form-input" placeholder="특이사항...">
           </div>
         </div>
@@ -308,7 +308,7 @@
           <div class="detail-value" id="invoice-modal-status-badge"></div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">의 주문 건수</div>
+          <div class="detail-label">주문 건수</div>
           <div class="detail-value" id="invoice-modal-total-orders"></div>
         </div>
         <div class="detail-item">
@@ -316,7 +316,7 @@
           <div class="detail-value" id="invoice-modal-total-qty"></div>
         </div>
         <div class="detail-item">
-          <div class="detail-label">의 총금액</div>
+          <div class="detail-label">총금액</div>
           <div class="detail-value" id="invoice-modal-total-amount"></div>
         </div>
         <div class="detail-item">
@@ -367,7 +367,6 @@
 <script src="js/admin.js"></script>
 
 <script>
-  // Extra modal close bindings
   document.addEventListener('DOMContentLoaded', function() {
     var footerClose = document.getElementById('modal-footer-close');
     if (footerClose) footerClose.addEventListener('click', function() {
