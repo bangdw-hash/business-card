@@ -1,298 +1,142 @@
-// =====================================================
-// Card Preview Rendering (HTML Canvas)
-// js/preview.js
-// =====================================================
+// 명함 캔버스 미리보기 렌더링
 
-'use strict';
-
-/**
- * Render the front face of the business card onto a canvas element.
- * @param {HTMLCanvasElement} canvas
- * @param {Object} data - Card data fields
- */
 function renderCardFront(canvas, data) {
-  if (!canvas) return;
-  const layout = CONFIG.cardFrontLayout;
-  canvas.width  = layout.width;
-  canvas.height = layout.height;
+  const L = CONFIG.cardFrontLayout;
   const ctx = canvas.getContext('2d');
+  canvas.width = L.width;
+  canvas.height = L.height;
 
-  // Background
-  ctx.fillStyle = layout.bgColor;
-  ctx.fillRect(0, 0, layout.width, layout.height);
+  // 배경
+  ctx.fillStyle = L.bgColor;
+  ctx.fillRect(0, 0, L.width, L.height);
 
-  // Left accent stripe
-  ctx.fillStyle = layout.accentColor;
-  ctx.fillRect(0, 0, layout.accentStripeWidth, layout.height);
+  // 왼쪽 액센트 바
+  ctx.fillStyle = L.accentColor;
+  ctx.fillRect(L.accentBar.x, L.accentBar.y, L.accentBar.w, L.accentBar.h);
 
-  // Right accent stripe (thin)
-  ctx.fillStyle = layout.accentColor;
-  ctx.fillRect(layout.width - 4, 0, 4, layout.height);
+  // 학교명 국문
+  ctx.fillStyle = L.schoolNameKr.color;
+  ctx.font = `${L.schoolNameKr.bold ? 'bold ' : ''}${L.schoolNameKr.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.fillText(CONFIG.app.schoolName, L.schoolNameKr.x, L.schoolNameKr.y);
 
-  // Top accent bar
-  ctx.fillStyle = layout.accentColor;
-  ctx.fillRect(0, 0, layout.width, 4);
+  // 학교명 영문
+  ctx.fillStyle = L.schoolNameEn.color;
+  ctx.font = `${L.schoolNameEn.fontSize}px 'Inter', sans-serif`;
+  ctx.fillText(CONFIG.app.schoolNameEn, L.schoolNameEn.x, L.schoolNameEn.y);
 
-  // Bottom accent bar
-  ctx.fillStyle = layout.accentColor;
-  ctx.fillRect(0, layout.height - 4, layout.width, 4);
-
-  // School name (Korean)
-  const sn = layout.schoolName;
-  ctx.font = (sn.bold ? 'bold ' : '') + sn.fontSize + 'px "Noto Sans KR", "Malgun Gothic", sans-serif';
-  ctx.fillStyle = sn.color;
-  ctx.fillText(CONFIG.school.nameKr, sn.x + layout.accentStripeWidth + 10, sn.y);
-
-  // School name (English)
-  const sne = layout.schoolNameEn;
-  ctx.font = sne.fontSize + 'px Arial, sans-serif';
-  ctx.fillStyle = sne.color;
-  ctx.fillText(CONFIG.school.nameEn, sne.x + layout.accentStripeWidth + 10, sne.y);
-
-  // Divider line
-  const dl = layout.dividerLine;
+  // 구분선
+  ctx.strokeStyle = L.divider.color;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.strokeStyle = dl.color;
-  ctx.lineWidth = dl.thickness;
-  ctx.moveTo(dl.x, dl.y);
-  ctx.lineTo(dl.x + dl.w, dl.y);
+  ctx.moveTo(L.divider.x, L.divider.y);
+  ctx.lineTo(L.divider.x + L.divider.w, L.divider.y);
   ctx.stroke();
 
-  // Helper: draw a text field
-  function drawField(fieldCfg, text, label) {
-    const isEmpty = !text || text.trim() === '';
-    const displayText = isEmpty ? '' : text;
+  const fields = L.fields;
 
-    ctx.font = (fieldCfg.bold ? 'bold ' : '') + fieldCfg.fontSize + 'px ' + fieldCfg.fontFamily;
-
-    if (isEmpty) {
-      ctx.fillStyle = '#cccccc';
-      ctx.font = 'italic ' + (fieldCfg.fontSize - 2) + 'px Arial, sans-serif';
-      // skip placeholder for cleanliness
-      return;
-    }
-
-    ctx.fillStyle = fieldCfg.color;
-
-    if (label) {
-      // Draw label in smaller text
-      ctx.font = '600 ' + (fieldCfg.fontSize - 2) + 'px Arial, sans-serif';
-      ctx.fillStyle = '#888888';
-      ctx.fillText(label + '  ', fieldCfg.x, fieldCfg.y);
-      const labelWidth = ctx.measureText(label + '  ').width;
-
-      ctx.font = (fieldCfg.bold ? 'bold ' : '') + fieldCfg.fontSize + 'px ' + fieldCfg.fontFamily;
-      ctx.fillStyle = fieldCfg.color;
-      ctx.fillText(displayText, fieldCfg.x + labelWidth, fieldCfg.y);
-    } else {
-      ctx.font = (fieldCfg.bold ? 'bold ' : '') + fieldCfg.fontSize + 'px ' + fieldCfg.fontFamily;
-      ctx.fillStyle = fieldCfg.color;
-      ctx.fillText(displayText, fieldCfg.x, fieldCfg.y);
-    }
-  }
-
-  const f = layout.fields;
-  const ox = layout.accentStripeWidth + 10; // offset for stripe
-
-  // Name
-  if (data.name) {
-    ctx.font = 'bold ' + f.name.fontSize + 'px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillStyle = f.name.color;
-    ctx.fillText(data.name, f.name.x + ox, f.name.y);
-  }
-
-  // Position
-  if (data.positionKr) {
-    ctx.font = f.position.fontSize + 'px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillStyle = f.position.color;
-    ctx.fillText(data.positionKr, f.position.x + ox, f.position.y);
-  }
-
-  // Department
-  if (data.department) {
-    ctx.font = f.department.fontSize + 'px "Noto Sans KR", "Malgun Gothic", sans-serif';
-    ctx.fillStyle = f.department.color;
-    ctx.fillText(data.department, f.department.x + ox, f.department.y);
-  }
-
-  // Phone / Mobile / Email / Extension (with labels)
-  function drawLabelField(fieldKey, value) {
-    const fc = f[fieldKey];
-    if (!fc || !value) return;
-    const label = fc.label || '';
-    ctx.font = '600 ' + (fc.fontSize - 2) + 'px Arial, sans-serif';
-    ctx.fillStyle = '#888888';
-    const labelW = ctx.measureText(label + '  ').width;
-    ctx.fillText(label, fc.x + ox, fc.y);
-
-    ctx.font = fc.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = fc.color;
-    ctx.fillText(value, fc.x + ox + labelW, fc.y);
-  }
-
-  drawLabelField('phone',     data.phone);
-  drawLabelField('mobile',    data.mobile);
-  drawLabelField('email',     data.email);
-  drawLabelField('extension', data.extension);
-
-  // Address
-  if (data.address) {
-    ctx.font = f.address.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = f.address.color;
-    ctx.fillText(data.address, f.address.x + ox, f.address.y);
-  }
-
-  // Watermark if no key info
-  if (!data.name && !data.department && !data.positionKr) {
-    ctx.font = 'bold 18px Arial, sans-serif';
-    ctx.fillStyle = 'rgba(0,48,135,0.08)';
-    ctx.save();
-    ctx.translate(layout.width / 2, layout.height / 2);
-    ctx.rotate(-Math.PI / 8);
-    ctx.fillText('명함 미리보기', -80, 0);
-    ctx.restore();
-  }
+  // 이름
+  drawField(ctx, fields.name, data.name, '[이름]');
+  // 직급
+  drawField(ctx, fields.position, data.position_kr, '[직급]');
+  // 부서
+  drawField(ctx, fields.department, data.department, '[부서]');
+  // 전화
+  if (data.phone || data.extension) drawLabelField(ctx, fields.phone, data.phone, '[전화번호]');
+  // 휴대폰
+  if (data.mobile) drawLabelField(ctx, fields.mobile, data.mobile, '[휴대폰]');
+  // 팩스
+  if (data.fax) drawLabelField(ctx, fields.fax, data.fax, '[팩스]');
+  // 이메일
+  drawLabelField(ctx, fields.email, data.email, '[이메일]');
+  // 내선
+  if (data.extension) drawLabelField(ctx, fields.extension, data.extension, null);
+  // 주소
+  const addr = data.address || CONFIG.app.defaultAddress;
+  ctx.fillStyle = fields.address.color;
+  ctx.font = `${fields.address.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.fillText(addr, fields.address.x, fields.address.y);
 }
 
-/**
- * Render the back face of the business card onto a canvas element.
- * @param {HTMLCanvasElement} canvas
- * @param {Object} data - Card data fields
- */
 function renderCardBack(canvas, data) {
-  if (!canvas) return;
-  const layout = CONFIG.cardBackLayout;
-  canvas.width  = layout.width;
-  canvas.height = layout.height;
+  const L = CONFIG.cardBackLayout;
   const ctx = canvas.getContext('2d');
+  canvas.width = L.width;
+  canvas.height = L.height;
 
-  // Background (dark blue)
-  ctx.fillStyle = layout.bgColor;
-  ctx.fillRect(0, 0, layout.width, layout.height);
+  // 배경
+  ctx.fillStyle = L.bgColor;
+  ctx.fillRect(0, 0, L.width, L.height);
 
-  // Decorative gold stripe on left
-  ctx.fillStyle = layout.accentColor;
-  ctx.fillRect(0, 0, 8, layout.height);
+  // 금색 액센트 바
+  ctx.fillStyle = L.accentBar.color;
+  ctx.fillRect(L.accentBar.x, L.accentBar.y, L.accentBar.w, L.accentBar.h);
 
-  // Corner accent — top-right gold triangle
+  // 학교명
+  ctx.fillStyle = L.schoolNameKr.color;
+  ctx.font = `${L.schoolNameKr.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.fillText(CONFIG.app.schoolName, L.schoolNameKr.x, L.schoolNameKr.y);
+
+  ctx.fillStyle = L.schoolNameEn.color;
+  ctx.font = `bold ${L.schoolNameEn.fontSize}px 'Inter', sans-serif`;
+  ctx.fillText(CONFIG.app.schoolNameEn, L.schoolNameEn.x, L.schoolNameEn.y);
+
+  // 구분선
+  ctx.strokeStyle = L.divider.color;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.fillStyle = layout.accentColor;
-  ctx.moveTo(layout.width - 80, 0);
-  ctx.lineTo(layout.width, 0);
-  ctx.lineTo(layout.width, 80);
-  ctx.closePath();
-  ctx.fill();
-
-  // School name (English)
-  const sne = layout.schoolNameEn;
-  ctx.font = sne.fontSize + 'px Arial, sans-serif';
-  ctx.fillStyle = sne.color;
-  ctx.fillText(CONFIG.school.nameEn, sne.x + 18, sne.y);
-
-  // Subtitle
-  const sns = layout.schoolNameSub;
-  ctx.font = sns.fontSize + 'px Arial, sans-serif';
-  ctx.fillStyle = sns.color;
-  ctx.fillText(CONFIG.school.website || 'www.asea.ac.kr', sns.x + 18, sns.y);
-
-  // Divider line (gold)
-  const dl = layout.dividerLine;
-  ctx.beginPath();
-  ctx.strokeStyle = dl.color;
-  ctx.lineWidth = dl.thickness;
-  ctx.moveTo(dl.x + 18, dl.y);
-  ctx.lineTo(dl.x + 18 + dl.w, dl.y);
+  ctx.moveTo(L.divider.x, L.divider.y);
+  ctx.lineTo(L.divider.x + L.divider.w, L.divider.y);
   ctx.stroke();
 
-  const f = layout.fields;
-  const ox = 18;
+  const fields = L.fields;
+  drawField(ctx, fields.nameEn, data.applicant_name_en, '[English Name]');
+  drawField(ctx, fields.positionEn, data.position_en, '[Title]');
+  drawField(ctx, fields.departmentEn, data.department_en, '[Department]');
+  if (data.phone) drawLabelField(ctx, fields.phone, data.phone, '[Phone]');
+  if (data.mobile) drawLabelField(ctx, fields.mobile, data.mobile, '[Mobile]');
+  drawLabelField(ctx, fields.email, data.email, '[Email]');
+  const addrEn = data.address_en || CONFIG.app.defaultAddressEn;
+  ctx.fillStyle = fields.addressEn.color;
+  ctx.font = `${fields.addressEn.fontSize}px 'Inter', sans-serif`;
+  ctx.fillText(addrEn, fields.addressEn.x, fields.addressEn.y);
+}
 
-  // Name (English)
-  if (data.nameEn) {
-    ctx.font = 'bold ' + f.nameEn.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = f.nameEn.color;
-    ctx.fillText(data.nameEn, f.nameEn.x + ox, f.nameEn.y);
-  }
-
-  // Position (English)
-  if (data.positionEn) {
-    ctx.font = f.positionEn.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = f.positionEn.color;
-    ctx.fillText(data.positionEn, f.positionEn.x + ox, f.positionEn.y);
-  }
-
-  // Department (English)
-  if (data.departmentEn) {
-    ctx.font = f.departmentEn.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = f.departmentEn.color;
-    ctx.fillText(data.departmentEn, f.departmentEn.x + ox, f.departmentEn.y);
-  }
-
-  // Contact fields with labels
-  function drawLabelFieldBack(fieldKey, value) {
-    const fc = f[fieldKey];
-    if (!fc || !value) return;
-    const label = fc.label || '';
-    ctx.font = '600 ' + (fc.fontSize - 2) + 'px Arial, sans-serif';
-    ctx.fillStyle = 'rgba(200,214,240,0.7)';
-    const labelW = ctx.measureText(label + '  ').width;
-    ctx.fillText(label, fc.x + ox, fc.y);
-
-    ctx.font = fc.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = fc.color;
-    ctx.fillText(value, fc.x + ox + labelW, fc.y);
-  }
-
-  drawLabelFieldBack('phone',  data.phone);
-  drawLabelFieldBack('mobile', data.mobile);
-  drawLabelFieldBack('email',  data.email);
-
-  // Address (English)
-  if (data.addressEn) {
-    ctx.font = f.addressEn.fontSize + 'px Arial, sans-serif';
-    ctx.fillStyle = f.addressEn.color;
-    ctx.fillText(data.addressEn, f.addressEn.x + ox, f.addressEn.y);
-  }
-
-  // Watermark if no key info
-  if (!data.nameEn && !data.departmentEn && !data.positionEn) {
-    ctx.font = 'bold 18px Arial, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+function drawField(ctx, field, value, placeholder) {
+  const text = value && value.trim() ? value : placeholder;
+  const isEmpty = !value || !value.trim();
+  ctx.fillStyle = isEmpty ? '#bbbbbb' : field.color;
+  ctx.font = `${field.bold ? 'bold ' : ''}${field.fontSize}px 'Noto Sans KR', 'Inter', sans-serif`;
+  if (isEmpty) {
     ctx.save();
-    ctx.translate(layout.width / 2, layout.height / 2);
-    ctx.rotate(-Math.PI / 8);
-    ctx.fillText('CARD BACK PREVIEW', -100, 0);
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#cccccc';
+    const metrics = ctx.measureText(placeholder);
+    ctx.strokeRect(field.x - 4, field.y - field.fontSize, metrics.width + 8, field.fontSize + 8);
     ctx.restore();
   }
+  ctx.fillText(text, field.x, field.y);
 }
 
-/**
- * Download a canvas as a PNG file.
- * @param {HTMLCanvasElement} canvas
- * @param {string} filename
- */
-function downloadCardImage(canvas, filename) {
-  if (!canvas) return;
-  try {
-    const link = document.createElement('a');
-    link.download = filename || 'business-card.png';
-    link.href = canvas.toDataURL('image/png');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (e) {
-    console.error('[Preview] 다운로드 오류:', e);
-    alert('이미지 다운로드에 실패했습니다.');
+function drawLabelField(ctx, field, value, placeholder) {
+  const label = field.label || '';
+  const text = value && value.trim() ? value : (placeholder || '');
+  const isEmpty = !value || !value.trim();
+  if (label) {
+    ctx.fillStyle = '#888888';
+    ctx.font = `${field.fontSize - 1}px 'Inter', sans-serif`;
+    ctx.fillText(label, field.x, field.y);
+    const labelW = ctx.measureText(label + ' ').width;
+    ctx.fillStyle = isEmpty ? '#bbbbbb' : field.color;
+    ctx.font = `${field.fontSize}px 'Noto Sans KR', 'Inter', sans-serif`;
+    ctx.fillText(text, field.x + labelW, field.y);
+  } else {
+    drawField(ctx, field, value, placeholder);
   }
 }
 
-/**
- * Render a simple placeholder card (no data)
- */
-function renderPlaceholderFront(canvas) {
-  renderCardFront(canvas, {});
-}
-
-function renderPlaceholderBack(canvas) {
-  renderCardBack(canvas, {});
+function downloadCardImage(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename || 'business-card.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 }
