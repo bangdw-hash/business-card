@@ -369,6 +369,43 @@ tr.urgent-row { border-left: 3px solid var(--danger); }
 .login-school { font-size: 0.88rem; color: var(--gray-500); text-align: center; margin-bottom: 4px; }
 .login-title  { font-size: 1.2rem; font-weight: 700; color: var(--gray-700); text-align: center; margin-bottom: 28px; }
 
+/* ── 이메일 분할 입력 ── */
+.email-input-split {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.email-input-split .form-input {
+  border-radius: var(--radius) 0 0 var(--radius);
+  border-right: none;
+  flex: 1;
+}
+.email-at-domain {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 42px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-left: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 14px;
+  color: var(--gray-600);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── 임원 전용 badge (premium card) ── */
+.radio-card-badge {
+  font-size: 11px;
+  background: var(--primary);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
 /* ── 인쇄 ── */
 @media print {
   .nav-bar, .navbar, .btn, .tabs, .tab-filter, .tab-btn, .modal-close, .step-nav { display: none !important; }

@@ -24,7 +24,6 @@ function _enFont(size, bold) {
 }
 
 function _norm(data) {
-  // card-form.js 는 positionKr, admin/vendor 는 position_kr 사용 — 둘 다 처리
   return {
     name:         data.name        || data.applicant_name    || '',
     nameEn:       data.nameEn      || data.applicant_name_en || '',
@@ -39,6 +38,7 @@ function _norm(data) {
     extension:    data.extension   || '',
     address:      data.address     || CONFIG.app.defaultAddress,
     addressEn:    data.addressEn   || data.address_en || CONFIG.app.defaultAddressEn,
+    include_qr:   data.include_qr !== undefined ? data.include_qr : true,
   };
 }
 
@@ -90,6 +90,24 @@ function renderCardFront(canvas, rawData) {
   ctx.fillStyle = F.address.color;
   ctx.font = _krFont(F.address.fontSize, false);
   ctx.fillText(d.address, F.address.x, F.address.y);
+
+  // QR코드 영역 (우측 상단)
+  if (d.include_qr !== false) {
+    var qx = L.width - 170, qy = 40, qw = 130, qh = 130;
+    ctx.strokeStyle = '#cccccc';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.strokeRect(qx, qy, qw, qh);
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#eeeeee';
+    ctx.fillRect(qx + 1, qy + 1, qw - 2, qh - 2);
+    ctx.fillStyle = '#999999';
+    ctx.font = _enFont(11, false);
+    ctx.textAlign = 'center';
+    ctx.fillText('QR Code', qx + qw / 2, qy + qh / 2 - 6);
+    ctx.fillText('아세아 홈페이지', qx + qw / 2, qy + qh / 2 + 10);
+    ctx.textAlign = 'left';
+  }
 }
 
 function renderCardBack(canvas, rawData) {

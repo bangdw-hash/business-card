@@ -26,9 +26,14 @@ const CONFIG = {
   app: {
     baseUrl: 'https://bangdw-hash.github.io/business-card',
     schoolName: '아세아항공직업전문학교',
-    schoolNameEn: 'ASEA Aviation Vocational School',
-    defaultAddress: '서울특별시 강서구 오쇄로 56 (아세아항공직업전문학교)',
-    defaultAddressEn: '56, Osoe-ro, Gangseo-gu, Seoul, Republic of Korea',
+    schoolNameEn: 'ASEA AVIATION COLLEGE',
+    defaultAddress: '서울특별시 영등포구 당산로32길 16',
+    defaultAddressEn: '16, Dangsan-ro 32-gil, Yeongdeungpo-gu, Seoul, Republic of Korea',
+    defaultFax: '02-714-1260',
+    emailDomain: '@asea.or.kr',
+    addressPresets: [
+      '서울특별시 영등포구 당산로32길 16',
+    ],
   },
 
   // 용지 종류 표시명
