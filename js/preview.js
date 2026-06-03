@@ -1,5 +1,27 @@
 // 명함 캔버스 미리보기 렌더링
+// KoPubWorld 돋움 서체 우선 적용 (Canvas FontFace API)
 // data 키는 snake_case / camelCase 모두 허용
+
+(function() {
+  if (typeof FontFace === 'undefined') return;
+  var base = 'assets/fonts/';
+  [
+    ['KoPubWorld_Dotum_Light.ttf',  '300'],
+    ['KoPubWorld_Dotum_Medium.ttf', '500'],
+    ['KoPubWorld_Dotum_Bold.ttf',   '700'],
+  ].forEach(function(w) {
+    new FontFace('KoPubWorldDotum', 'url(' + base + w[0] + ')', { weight: w[1] })
+      .load().then(function(f) { document.fonts.add(f); })
+      .catch(function() {});
+  });
+})();
+
+function _krFont(size, bold) {
+  return (bold ? 'bold ' : '') + size + "px KoPubWorldDotum, 'Noto Sans KR', sans-serif";
+}
+function _enFont(size, bold) {
+  return (bold ? 'bold ' : '') + size + "px 'Inter', sans-serif";
+}
 
 function _norm(data) {
   // card-form.js 는 positionKr, admin/vendor 는 position_kr 사용 — 둘 다 처리
@@ -38,12 +60,12 @@ function renderCardFront(canvas, rawData) {
 
   // 학교명 국문
   ctx.fillStyle = L.schoolNameKr.color;
-  ctx.font = `${L.schoolNameKr.bold ? 'bold ' : ''}${L.schoolNameKr.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.font = _krFont(L.schoolNameKr.fontSize, L.schoolNameKr.bold);
   ctx.fillText(CONFIG.app.schoolName, L.schoolNameKr.x, L.schoolNameKr.y);
 
   // 학교명 영문
   ctx.fillStyle = L.schoolNameEn.color;
-  ctx.font = `${L.schoolNameEn.fontSize}px 'Inter', sans-serif`;
+  ctx.font = _enFont(L.schoolNameEn.fontSize, false);
   ctx.fillText(CONFIG.app.schoolNameEn, L.schoolNameEn.x, L.schoolNameEn.y);
 
   // 구분선
@@ -66,7 +88,7 @@ function renderCardFront(canvas, rawData) {
 
   // 주소
   ctx.fillStyle = F.address.color;
-  ctx.font = `${F.address.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.font = _krFont(F.address.fontSize, false);
   ctx.fillText(d.address, F.address.x, F.address.y);
 }
 
@@ -88,11 +110,11 @@ function renderCardBack(canvas, rawData) {
 
   // 학교명
   ctx.fillStyle = L.schoolNameKr.color;
-  ctx.font = `${L.schoolNameKr.fontSize}px 'Noto Sans KR', sans-serif`;
+  ctx.font = _krFont(L.schoolNameKr.fontSize, false);
   ctx.fillText(CONFIG.app.schoolName, L.schoolNameKr.x, L.schoolNameKr.y);
 
   ctx.fillStyle = L.schoolNameEn.color;
-  ctx.font = `bold ${L.schoolNameEn.fontSize}px 'Inter', sans-serif`;
+  ctx.font = _enFont(L.schoolNameEn.fontSize, true);
   ctx.fillText(CONFIG.app.schoolNameEn, L.schoolNameEn.x, L.schoolNameEn.y);
 
   // 구분선
@@ -112,7 +134,7 @@ function renderCardBack(canvas, rawData) {
   _drawLabelField(ctx, F.email, d.email, '[Email]');
 
   ctx.fillStyle = F.addressEn.color;
-  ctx.font = `${F.addressEn.fontSize}px 'Inter', sans-serif`;
+  ctx.font = _enFont(F.addressEn.fontSize, false);
   ctx.fillText(d.addressEn, F.addressEn.x, F.addressEn.y);
 }
 
@@ -138,7 +160,7 @@ function _drawField(ctx, field, value, placeholder) {
   const text    = value && value.trim() ? value : placeholder;
   const isEmpty = !value || !value.trim();
   ctx.fillStyle = isEmpty ? '#cccccc' : field.color;
-  ctx.font = `${field.bold ? 'bold ' : ''}${field.fontSize}px 'Noto Sans KR', 'Inter', sans-serif`;
+  ctx.font = _krFont(field.fontSize, field.bold);
   if (isEmpty && placeholder) {
     ctx.save();
     ctx.setLineDash([4, 3]);
@@ -156,11 +178,11 @@ function _drawLabelField(ctx, field, value, placeholder) {
   const isEmpty = !value || !value.trim();
   if (label) {
     ctx.fillStyle = '#888888';
-    ctx.font = `${field.fontSize - 1}px 'Inter', sans-serif`;
+    ctx.font = _enFont(field.fontSize - 1, false);
     ctx.fillText(label, field.x, field.y);
     const lw = ctx.measureText(label + ' ').width;
     ctx.fillStyle = isEmpty ? '#cccccc' : field.color;
-    ctx.font = `${field.fontSize}px 'Noto Sans KR', 'Inter', sans-serif`;
+    ctx.font = _krFont(field.fontSize, false);
     if (text) ctx.fillText(text, field.x + lw, field.y);
   } else {
     _drawField(ctx, field, value, placeholder);

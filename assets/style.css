@@ -1,6 +1,12 @@
 /* 아세아항공직업전문학교 명함 신청 시스템 — Global CSS */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* ── KoPubWorld 돋움 서체 (로컬 파일) ── */
+@font-face { font-family: 'KoPubWorldDotum'; src: url('assets/fonts/KoPubWorld_Dotum_Light.ttf') format('truetype'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'KoPubWorldDotum'; src: url('assets/fonts/KoPubWorld_Dotum_Medium.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'KoPubWorldDotum'; src: url('assets/fonts/KoPubWorld_Dotum_Medium.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'KoPubWorldDotum'; src: url('assets/fonts/KoPubWorld_Dotum_Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
 :root {
   --primary: #003087;
   --primary-light: #1a4aa0;
@@ -31,7 +37,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; }
-body { font-family: 'Noto Sans KR', 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-700); line-height: 1.6; }
+body { font-family: 'KoPubWorldDotum', 'Noto Sans KR', 'Inter', sans-serif; background: var(--gray-50); color: var(--gray-700); line-height: 1.6; }
 a { color: var(--primary); text-decoration: none; }
 .hidden { display: none !important; }
 .text-center { text-align: center; }
@@ -219,7 +225,6 @@ a { color: var(--primary); text-decoration: none; }
 .badge-urgent  { background: #fee2e2; color: #991b1b; font-size: 0.7rem; padding: 2px 7px; }
 .urgent-badge  { display: inline-block; background: #fee2e2; color: #991b1b; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
 .reorder-badge { display: inline-block; background: #e0f2fe; color: #075985; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-left: 4px; }
-/* 인보이스 배지 */
 .badge-invoice-pending   { background: #f3f4f6; color: #6b7280; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
 .badge-invoice-confirmed { background: #dbeafe; color: #1e40af; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
 .badge-invoice-paid      { background: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
@@ -273,7 +278,6 @@ tr.urgent-row { border-left: 3px solid var(--danger); }
 .tab-btn.active .tab-count { background: var(--primary); color: #fff; }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
-/* 벤더/어드민 섹션: .hidden 클래스로 표시/숨김 제어됨 */
 .vendor-section.hidden { display: none; }
 .admin-section.hidden  { display: none; }
 .section-nav-btn { padding: 8px 16px; background: none; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: rgba(255,255,255,0.75); border-radius: var(--radius); transition: all 0.2s; }
