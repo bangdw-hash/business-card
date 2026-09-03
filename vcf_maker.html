@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>디지털 명함 생성기 | 아세아항공직업전문학교</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: #f5f7fa;
+    min-height: 100vh;
+    padding: 24px 16px 40px;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+  .header {
+    background: linear-gradient(135deg, #1a3a6b 0%, #2e5fa3 100%);
+    color: #fff; padding: 24px; border-radius: 16px 16px 0 0; text-align: center;
+  }
+  .header .icon { font-size: 28px; margin-bottom: 8px; }
+  .header h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 12px; opacity: 0.8; }
+  .form-card {
+    background: #fff; border-radius: 0 0 16px 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10); padding: 24px;
+  }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; font-weight: 500; }
+  input[type=text], input[type=tel], input[type=email], input[type=url] {
+    width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0;
+    border-radius: 8px; font-size: 14px; color: #222; outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  input:focus { border-color: #2e5fa3; }
+  .slug-hint { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .slug-hint b { color: #2e5fa3; }
+  .addr-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px; }
+  .divider { border: none; border-top: 1px solid #f0f0f0; margin: 16px 0; }
+  .required { color: #e55; }
+  .btn-gen {
+    width: 100%; padding: 14px; background: #1a3a6b; color: #fff;
+    border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-top: 8px; font-family: inherit;
+  }
+  .btn-gen:active { background: #122b52; }
+  .result {
+    margin-top: 20px; padding: 16px; background: #f0f4ff;
+    border-radius: 10px; border: 1px solid #c0d0f0;
+  }
+  .result-label { font-size: 11px; color: #666; margin-bottom: 8px; font-weight: 600; }
+  .url-row { display: flex; gap: 8px; align-items: stretch; }
+  .url-text {
+    flex: 1; font-size: 11px; color: #1a3a6b; word-break: break-all;
+    background: #fff; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid #c0d0f0; line-height: 1.5;
+  }
+  .btn-copy {
+    padding: 8px 14px; background: #2e5fa3; color: #fff; border: none;
+    border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; font-family: inherit;
+  }
+  .btn-copy.done { background: #2a8a4a; }
+  .btn-preview {
+    display: block; text-align: center; margin-top: 10px; padding: 11px;
+    background: #fff; color: #1a3a6b; border: 1.5px solid #1a3a6b;
+    border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none;
+  }
+  .note { font-size: 11px; color: #999; margin-top: 12px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="icon">✈️</div>
+    <h1>디지털 명함 생성기</h1>
+    <p>아세아항공직업전문학교 임직원용</p>
+  </div>
+  <div class="form-card">
+
+    <div class="field">
+      <label>이름 <span class="required">*</span></label>
+      <input id="f-name" type="text" placeholder="방시원" oninput="updateSlug()">
+      <div class="slug-hint">영문 링크명: vcf_<b id="slug-preview">이름입력</b></div>
+    </div>
+    <div class="field">
+      <label>직함 <span class="required">*</span></label>
+      <input id="f-title" type="text" placeholder="기획처 차장">
+    </div>
+    <div class="field">
+      <label>소속</label>
+      <input id="f-org" type="text" placeholder="아세아항공직업전문학교" value="아세아항공직업전문학교">
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label>핸드폰 <span class="required">*</span></label>
+      <input id="f-phone" type="tel" placeholder="010-0000-0000">
+    </div>
+    <div class="field">
+      <label>이메일</label>
+      <input id="f-email" type="email" placeholder="example@asea.or.kr">
+    </div>
+
+    <hr class="divider">
+
+    <div class="field">
+      <label>주소 1 (라벨 | 주소)</label>
+      <div class="addr-row">
+        <input id="f-a1l" type="text" placeholder="영등포캠퍼스">
+        <input id="f-a1" type="text" placeholder="서울특별시 영등포구 …">
+      </div>
+    </div>
+    <div class="field">
+      <label>주소 2 (선택)</label>
+      <div class="addr-row">
+        <input id="f-a2l" type="text" placeholder="용산캠퍼스">
+        <input id="f-a2" type="text" placeholder="서울특별시 용산구 …">
+      </div>
+    </div>
+    <div class="field">
+      <label>홈페이지</label>
+      <input id="f-web" type="url" placeholder="https://www.asea.or.kr/intro">
+    </div>
+
+    <button class="btn-gen" onclick="generate()">🔗 명함 링크 생성하기</button>
+
+    <div id="result" hidden>
+      <div class="result-label">생성된 링크 (복사 후 문자·카카오톡으로 전송)</div>
+      <div class="url-row">
+        <div class="url-text" id="url-out"></div>
+        <button class="btn-copy" id="copy-btn" onclick="copyUrl()">복사</button>
+      </div>
+      <a id="preview-a" class="btn-preview" target="_blank">👁 미리보기 열기</a>
+      <p class="note">
+        ※ 이 링크를 받은 사람은 누구나 바로 연락처 저장이 가능합니다.<br>
+        ※ GitHub 권한 없이도 즉시 사용 가능합니다.
+      </p>
+    </div>
+
+  </div>
+</div>
+<script>
+const CHO  = ['g','gg','n','d','dd','r','m','b','bb','s','ss','','j','jj','ch','k','t','p','h'];
+const JUNG = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+const JONG = ['','k','kk','k','n','nj','nh','t','l','lk','lm','lp','ls','lt','lp','lh','m','p','ps','s','ss','ng','j','ch','k','t','p','h'];
+
+function toRoman(str) {
+  let r = '';
+  for (const ch of str) {
+    const c = ch.charCodeAt(0);
+    if (c >= 0xAC00 && c <= 0xD7A3) {
+      const off = c - 0xAC00;
+      r += CHO[Math.floor(off / 28 / 21)] + JUNG[Math.floor(off / 28) % 21] + JONG[off % 28];
+    } else if (/[a-z0-9]/i.test(ch)) {
+      r += ch.toLowerCase();
+    }
+  }
+  return r || '';
+}
+
+function updateSlug() {
+  const slug = toRoman(document.getElementById('f-name').value) || '이름입력';
+  document.getElementById('slug-preview').textContent = slug;
+}
+
+function g(id) { return document.getElementById(id).value.trim(); }
+
+function generate() {
+  if (!g('f-name')) { alert('이름을 입력해주세요.'); return; }
+  if (!g('f-phone')) { alert('핸드폰 번호를 입력해주세요.'); return; }
+
+  const p = new URLSearchParams();
+  p.set('n', g('f-name'));
+  if (g('f-title')) p.set('t', g('f-title'));
+  if (g('f-org'))   p.set('o', g('f-org'));
+  if (g('f-phone')) p.set('p', g('f-phone'));
+  if (g('f-email')) p.set('e', g('f-email'));
+  if (g('f-a1l'))   p.set('a1l', g('f-a1l'));
+  if (g('f-a1'))    p.set('a1', g('f-a1'));
+  if (g('f-a2l'))   p.set('a2l', g('f-a2l'));
+  if (g('f-a2'))    p.set('a2', g('f-a2'));
+  if (g('f-web'))   p.set('w', g('f-web'));
+
+  const base = location.href.replace(/[^/]*(\?.*)?$/, '');
+  const url = base + 'vcf_card.html?' + p.toString();
+
+  document.getElementById('url-out').textContent = url;
+  document.getElementById('preview-a').href = url;
+  document.getElementById('result').hidden = false;
+}
+
+function copyUrl() {
+  const url = document.getElementById('url-out').textContent;
+  const btn = document.getElementById('copy-btn');
+  navigator.clipboard.writeText(url).then(() => {
+    btn.textContent = '복사됨!'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('done'); }, 2000);
+  }).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = url; document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    btn.textContent = '복사됨!'; btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('done'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
