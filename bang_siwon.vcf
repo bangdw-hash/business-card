@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:방시원
+N:방;시원;;;
+ORG:아세아항공직업전문학교
+TITLE:기획차장
+TEL;TYPE=CELL:010-2055-5883
+EMAIL;TYPE=WORK:bangsw@asea.or.kr
+ADR;TYPE=WORK;LABEL="영등포캠퍼스":;;당산로32길 16;서울특별시;영등포구;;대한민국
+URL:https://www.asea.or.kr/intro
+NOTE:영등포캠퍼스: 서울특별시 영등포구 당산로32길 16\n용산캠퍼스: 서울특별시 용산구 청파로43다길 30
+END:VCARD
