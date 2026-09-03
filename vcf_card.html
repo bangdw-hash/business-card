@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연락처 저장 중...</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+    background: #f5f7fa; display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; margin: 0; text-align: center; color: #555;
+  }
+  .msg { padding: 32px; }
+  .msg h2 { font-size: 18px; margin-bottom: 8px; color: #1a3a6b; }
+  .msg p { font-size: 14px; line-height: 1.6; }
+  .btn {
+    display: inline-block; margin-top: 20px; padding: 12px 24px;
+    background: #1a3a6b; color: #fff; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+    text-decoration: none;
+  }
+  .desktop-msg { display: none; }
+</style>
+</head>
+<body>
+<div class="msg" id="msg">
+  <h2>✈️ 연락처 불러오는 중...</h2>
+  <p>잠시만 기다려 주세요.</p>
+</div>
+<script>
+(function () {
+  var p = new URLSearchParams(location.search);
+  var n = p.get('n') || '';
+
+  if (!n) {
+    location.replace('vcf_maker.html');
+    return;
+  }
+
+  var lines = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    'FN:' + n,
+    'N:' + n.charAt(0) + ';' + n.slice(1) + ';;;'
+  ];
+  if (p.get('o'))  lines.push('ORG:'   + p.get('o'));
+  if (p.get('t'))  lines.push('TITLE:' + p.get('t'));
+  if (p.get('p'))  lines.push('TEL;TYPE=CELL:' + p.get('p'));
+  if (p.get('e'))  lines.push('EMAIL;TYPE=WORK:' + p.get('e'));
+  if (p.get('a1')) lines.push('ADR;TYPE=WORK;LABEL="' + (p.get('a1l') || '') + '":;;' + p.get('a1') + ';;;;');
+  if (p.get('w'))  lines.push('URL:' + p.get('w'));
+
+  var noteParts = [];
+  if (p.get('a1')) noteParts.push((p.get('a1l') || '') + ': ' + p.get('a1'));
+  if (p.get('a2')) noteParts.push((p.get('a2l') || '') + ': ' + p.get('a2'));
+  if (noteParts.length) lines.push('NOTE:' + noteParts.join('\\n'));
+
+  lines.push('END:VCARD');
+
+  var vcf  = lines.join('\r\n');
+  var blob = new Blob([vcf], {type: 'text/vcard;charset=utf-8'});
+  var url  = URL.createObjectURL(blob);
+
+  var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    /* 모바일: 즉시 연락처 앱으로 이동 */
+    window.location.replace(url);
+  } else {
+    /* 데스크톱: 다운로드 버튼 제공 */
+    document.getElementById('msg').innerHTML =
+      '<h2>✈️ ' + n + ' ' + (p.get('t') || '') + '</h2>' +
+      '<p>이 링크는 모바일에서 열면<br>연락처 앱이 바로 실행됩니다.</p>' +
+      '<a class="btn" href="' + url + '" download="' + n + '.vcf">📥 연락처 파일 저장</a>';
+  }
+})();
+</script>
+</body>
+</html>
